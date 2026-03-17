@@ -1,0 +1,17 @@
+{
+	"name": "SQLDB_Customer_DF_DS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDB_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "Saleslt",
+			"table": "Customer_New"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

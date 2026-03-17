@@ -1,0 +1,68 @@
+{
+	"name": "Ingestion_Customer_JOIN_ADLS",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy Customer and their address to ADLS",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT a.CustomerID, a.FirstName, a.LastName, b.AddressID, c.Addressline1, c.Addressline2, c.city,c.StateProvince, c.CountryRegion FROM [SalesLT].[Customer] a\ninner join [SalesLT].[CustomerAddress] b\nON a.CustomerID = b.CustomerID\ninner join [SalesLT].[Address] c\nON b.AddressID = c.AddressID",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SQL_DB_Customer_DS",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "CSV_ADLS_Generic_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"FilePath": "JOIN",
+							"Filesystem": "landing",
+							"filename": "saleslt.Customer_Address.csv"
+						}
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-03-10T00:43:39Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

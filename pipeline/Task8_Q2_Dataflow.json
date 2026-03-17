@@ -1,0 +1,35 @@
+{
+	"name": "Task8_Q2_Dataflow",
+	"properties": {
+		"description": "Create a pipeline to join the two files (Customer, Customer Address) based on customer id and save the result as a JSON file.\n",
+		"activities": [
+			{
+				"name": "Task8_Q2_Dataflow",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "Join_Customer_CustAddress_Dataflow",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-03-15T19:39:14Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

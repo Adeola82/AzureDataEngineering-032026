@@ -1,0 +1,9 @@
+{
+	"name": "adeproject2002",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "732ffd33-6a80-40ef-984c-f67b262b0b95",
+		"tenantId": "0580450f-f489-4d09-bf47-53ab9d767daa"
+	}
+}

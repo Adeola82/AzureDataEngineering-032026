@@ -1,0 +1,17 @@
+{
+	"name": "SQL_T8_2_Q1_DS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDB_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "salesLT",
+			"table": "Customer_OddID"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

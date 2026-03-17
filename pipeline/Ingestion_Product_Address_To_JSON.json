@@ -1,0 +1,131 @@
+{
+	"name": "Ingestion_Product_Address_To_JSON",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Product Count",
+				"description": "Copy data when the number of records is greater than 10 in product table",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT COUNT(*) AS recordcount FROM saleslt.Product",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SQL_DB_Product_DS",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "If Condition1_copy1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Get Product Count",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(activity('Get Product Count').output.firstRow.recordcount,10)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Copy data from SQL DB to ADLS JSON_copy1",
+							"description": "Copy data from SQL DB to ADLS JSON when record count is greater than 10",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "SQL_DB_Generic_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"SchemaName": "Saleslt",
+										"FileName": "Product"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "JSON_Product_Generic_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"Filepath": "JSON",
+										"filename": "saleslt.Product"
+									}
+								}
+							]
+						},
+						{
+							"name": "Execute Pipeline Copy Address to CSV ADLS",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Copy data from SQL DB to ADLS JSON_copy1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Copy_Address_to_CSV_ADLS",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-03-10T15:43:55Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
