@@ -87,7 +87,7 @@
 					},
 					"ifTrueActivities": [
 						{
-							"name": "Copy Customer data",
+							"name": "Copy Customer data Threshold",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
