@@ -1,0 +1,18 @@
+{
+	"name": "AzureSqlDB_LS",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "This is connecting to SQL DB",
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"server": "adeproject2002server.database.windows.net",
+			"database": "adeproject2002db",
+			"encrypt": "mandatory",
+			"trustServerCertificate": false,
+			"authenticationType": "SQL",
+			"userName": "adeolao",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDk3NDAxOTAzLUE4NDQtNEVBNS1BOEU4LTQ0NTVERDkwMkJEQV84NzNjZWRjNC1jMGMxLTRkNjQtYTkyNi1hYWJhMTBkNDIyMjgiDQp9"
+		}
+	}
+}

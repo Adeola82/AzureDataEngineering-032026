@@ -1,0 +1,105 @@
+{
+	"name": "DF_SCD2_Employee",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Employee_txt_DS",
+						"type": "DatasetReference"
+					},
+					"name": "employeecsv"
+				},
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTabledb_DS2",
+						"type": "DatasetReference"
+					},
+					"name": "EmployeeTable"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTabledb_DS2",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as short,",
+				"          name as string,",
+				"          city as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> employeecsv",
+				"source(output(",
+				"          ID as integer,",
+				"          name as string,",
+				"          city as string,",
+				"          ActiveFlag as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> EmployeeTable",
+				"employeecsv, select1 lookup(id == db_ID,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"derivedColumn1 alterRow(insertIf(isNull(db_ID)),",
+				"     updateIf(name!=db_name||city!=db_name)) ~> alterRow1",
+				"EmployeeTable select(mapColumn(",
+				"          db_ID = ID,",
+				"          db_name = name,",
+				"          db_city = city,",
+				"          db_ActiveFlag = ActiveFlag",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"lookup1 derive(db_ActiveFlag = 1) ~> derivedColumn1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ID as integer,",
+				"          name as string,",
+				"          city as string,",
+				"          ActiveFlag as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['ID'],",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          ID = db_ID,",
+				"          name = db_name,",
+				"          city = db_city,",
+				"          ActiveFlag = db_ActiveFlag",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

@@ -1,0 +1,121 @@
+{
+	"name": "Copy_Address_to_CSV_ADLS",
+	"properties": {
+		"activities": [
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Get Address Record Count",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(activity('Get Address Record Count').output.firstRow.recordcount,100)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Copy Address data to CSV in ADLS",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SQL_DB_Generic_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"SchemaName": "SalesLT",
+										"FileName": "Address"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "CSV_ADLS_Generic_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"FilePath": "Address",
+										"Filesystem": "landing",
+										"filename": "SalesLT.Address"
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "Get Address Record Count",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT COUNT(*) AS RecordCount FROM SalesLT.Address",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SQL_DB_Generic_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"SchemaName": "SalesLT",
+							"FileName": "Address"
+						}
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-03-10T15:43:55Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

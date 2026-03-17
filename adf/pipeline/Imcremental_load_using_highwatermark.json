@@ -1,0 +1,169 @@
+{
+	"name": "Imcremental_load_using_highwatermark",
+	"properties": {
+		"description": "Create a pipeline that will create the incremental pipeline using the table instead of HighWaterMark File.",
+		"activities": [
+			{
+				"name": "Lookup Highwatermark date",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT HW_DATE AS 'datefromHW' FROM  [dbo].[Highwatermark] where HW_Tablename = 'Customer'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SQL_DB_Product_DS",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Lookup Customer last modifiedon date",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Lookup Highwatermark date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select max(modifieddate) as lastmodifiedon from saleslt.customer",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SQL_DB_Customer_DS",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Copy data incrementally",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Lookup Customer last modifiedon date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select * from saleslt.customer\nwhere modifieddate > '@{activity('Lookup Highwatermark date').output.firstRow.datefromHW}' and modifieddate <= '@{activity('Lookup Customer last modifiedon date').output.firstRow.lastmodifiedon}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"CustomerID"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SQL_DB_Customer_DS",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "SQL_DB_Metadata_DS",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Updating the High Watermark table",
+				"description": "Updating the High Watermark table to the max modified on date in the customer table",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Copy data incrementally",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDB_LS",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "UPDATE dbo.Highwatermark\nSET HW_DATE = '@{activity('Lookup Customer last modifiedon date').output.firstRow.lastmodifiedon}'\n",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-03-13T15:32:18Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

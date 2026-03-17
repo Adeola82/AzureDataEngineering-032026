@@ -1,0 +1,158 @@
+{
+	"name": "Check_Threshold_Record_Against_Customer_Record",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Threshold Record Count",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Get Customer Record Count",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "Threshold_DS",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "Get Customer Record Count",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT COUNT(*) AS RecordCount FROM SalesLT.Customer",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SQL_DB_Generic_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"SchemaName": "SalesLT",
+							"FileName": "Customer"
+						}
+					}
+				}
+			},
+			{
+				"name": "Compare Customer record and Threshold and copy",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Get Threshold Record Count",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(\nactivity('Get Customer Record Count').output.firstRow.recordcount,\nint(activity('Get Threshold Record Count').output.firstRow.Prop_0)\n)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Copy Customer data",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SQL_DB_Generic_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"SchemaName": "SalesLT",
+										"FileName": "Customer"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "CSV_ADLS_Generic_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"FilePath": "Customer",
+										"Filesystem": "landing",
+										"filename": "Customer_New_0310.csv"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-03-11T00:34:29Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

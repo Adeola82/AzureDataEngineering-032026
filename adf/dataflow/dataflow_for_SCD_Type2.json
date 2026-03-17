@@ -1,0 +1,171 @@
+{
+	"name": "dataflow_for_SCD_Type2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Employee_txt_DS",
+						"type": "DatasetReference"
+					},
+					"name": "EmployeeTxt"
+				},
+				{
+					"linkedService": {
+						"referenceName": "AzureSqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "EmployeeDBTable"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "AzureSqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"linkedService": {
+						"referenceName": "AzureSqlDB_LS",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink2"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "DerivedColumn"
+				},
+				{
+					"name": "split1"
+				},
+				{
+					"name": "alterRow1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "alterRow2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as short,",
+				"          name as string,",
+				"          city as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     partitionBy('roundRobin', 2)) ~> EmployeeTxt",
+				"source(output(",
+				"          ID as integer,",
+				"          name as string,",
+				"          city as string,",
+				"          ActiveFlag as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'dbo',",
+				"     tableName: 'Employee_SCDType2',",
+				"     isolationLevel: 'READ_UNCOMMITTED') ~> EmployeeDBTable",
+				"EmployeeDBTable select(mapColumn(",
+				"          db_ID = ID,",
+				"          db_name = name,",
+				"          db_city = city,",
+				"          db_ActiveFlag = ActiveFlag",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"EmployeeTxt, select1 lookup(id == db_ID,",
+				"     multiple: false,",
+				"     pickup: 'any',",
+				"     broadcast: 'auto')~> lookup1",
+				"lookup1 derive(ChangeType = iif(\r",
+				"isNull(db_ID),\r",
+				"'NEW',\r",
+				"iif(\r",
+				"name != db_name ||\r",
+				"city != db_city,\r",
+				"'UPDATE',\r",
+				"'NOCHANGE'\r",
+				")\r",
+				")) ~> DerivedColumn",
+				"DerivedColumn split(ChangeType == 'UPDATE',",
+				"     ChangeType == 'NEW',",
+				"     disjoint: false) ~> split1@(UpdateRecords, NewRecords, NoChange)",
+				"derivedColumn1 alterRow(updateIf(true())) ~> alterRow1",
+				"split1@UpdateRecords derive(db_ActiveFlag = 1) ~> derivedColumn1",
+				"split1@NewRecords derive(db_ActiveFlag = 1) ~> derivedColumn2",
+				"derivedColumn2 alterRow(updateIf(true())) ~> alterRow2",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ID as integer,",
+				"          name as string,",
+				"          city as string,",
+				"          ActiveFlag as integer",
+				"     ),",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'dbo',",
+				"     tableName: 'Employee_SCDType2',",
+				"     insertable: false,",
+				"     updateable: true,",
+				"     deletable: false,",
+				"     upsertable: false,",
+				"     keys:['id'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          ID = db_ID,",
+				"          name,",
+				"          city,",
+				"          ActiveFlag = db_ActiveFlag",
+				"     )) ~> sink1",
+				"alterRow2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ID as integer,",
+				"          name as string,",
+				"          city as string,",
+				"          ActiveFlag as integer",
+				"     ),",
+				"     format: 'table',",
+				"     store: 'sqlserver',",
+				"     schemaName: 'dbo',",
+				"     tableName: 'Employee_SCDType2',",
+				"     insertable: true,",
+				"     updateable: true,",
+				"     deletable: false,",
+				"     upsertable: false,",
+				"     keys:['id'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          ID = id,",
+				"          name,",
+				"          city,",
+				"          ActiveFlag = db_ActiveFlag",
+				"     )) ~> sink2"
+			]
+		}
+	}
+}

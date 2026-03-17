@@ -1,0 +1,139 @@
+{
+	"name": "Without_Foreach_Example_for Cust_CustAddr",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy Customer to ADLS",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SQL_DB_Generic_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"SchemaName": "SalesLT",
+							"FileName": "Customer"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "CSV_ADLS_Generic_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"FilePath": "Customer",
+							"Filesystem": "landing",
+							"filename": "saleslt.Customer.csv"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy CustomerAddress to ADLS_copy1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy Customer to ADLS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SQL_DB_Generic_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"SchemaName": "SalesLT",
+							"FileName": "CustomerAddress"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "CSV_ADLS_Generic_DS",
+						"type": "DatasetReference",
+						"parameters": {
+							"FilePath": "Customer",
+							"Filesystem": "landing",
+							"filename": "saleslt.CustomerAddress.csv"
+						}
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-03-10T16:37:41Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

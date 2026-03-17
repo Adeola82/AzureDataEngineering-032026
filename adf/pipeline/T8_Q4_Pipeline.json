@@ -1,0 +1,35 @@
+{
+	"name": "T8_Q4_Pipeline",
+	"properties": {
+		"description": "create a pipeline to read the Product CSV file, and calculate the highest listPrice of any product under each productcategory.\nEnsure that product shouldn't be of blue in color and save the result as CSV file inside ProductResult folder.",
+		"activities": [
+			{
+				"name": "Data flow1",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "T8_Q4_dataflow1",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-03-15T20:40:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
