@@ -33,7 +33,11 @@
 		},
 		"REST_LS_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://restcountries.com/v3.1/all?fields=name,capital,currencies"
+			"defaultValue": "https://restcountries.com/v3.1/all?fields=name,capital,cca2"
+		},
+		"RestService_LS2_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://restcountries.com/v3.1/name"
 		}
 	},
 	"variables": {
@@ -200,7 +204,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-11T00:34:29Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/Threshold_DS')]",
@@ -330,11 +334,102 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T15:43:55Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Generic_DS')]",
 				"[concat(variables('factoryId'), '/datasets/CSV_ADLS_Generic_DS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Copy_Countries_using_Foreach_names')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Create a pipeline to fetch the 5 countries (india,us,uk,china,russia) data from Rest API (https://restcountries.com/v3.1/name/{name}  here replace the {name} with Country name like https://restcountries.com/v3.1/name/us) and save it in separate file as JSON with File name equal to Country name.",
+				"activities": [
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@createArray('india','us','uk','china','russia')",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "RestSource",
+											"httpRequestTimeout": "00:01:40",
+											"requestInterval": "00.00:00:00.010",
+											"requestMethod": "GET",
+											"paginationRules": {
+												"supportRFC5988": "true"
+											}
+										},
+										"sink": {
+											"type": "JsonSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "JsonWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "Rest_Generic",
+											"type": "DatasetReference",
+											"parameters": {
+												"countryname": {
+													"value": "@item()",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Json_API_Generic",
+											"type": "DatasetReference",
+											"parameters": {
+												"countryname": {
+													"value": "@item()",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-03-18T00:44:58Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Rest_Generic')]",
+				"[concat(variables('factoryId'), '/datasets/Json_API_Generic')]"
 			]
 		},
 		{
@@ -413,7 +508,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T22:35:20Z"
+				"lastPublishTime": "2026-03-17T21:04:18Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/pipeline1-Customer')]",
@@ -493,7 +588,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-09T21:44:31Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Generic_DS')]",
@@ -563,7 +658,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-09T15:32:13Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/JSON_Customer_DS')]",
@@ -672,7 +767,7 @@
 					}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-09T21:47:46Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Generic_DS')]",
@@ -744,7 +839,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-09T15:32:13Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Customer_DS')]",
@@ -752,7 +847,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Copy_Customer_To_JSON')]",
+			"name": "[concat(parameters('factoryName'), '/Copy_Customer_To_JSON-ADLS')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -806,11 +901,499 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-09T15:03:00Z"
+				"lastPublishTime": "2026-03-17T21:04:16Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Customer_DS')]",
 				"[concat(variables('factoryId'), '/datasets/JSON_Customer_DS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Copy_List_of_Countries_REST_API')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Create a pipeline to fetch the All countries data from Rest API (https://restcountries.com/v3.1/all) and save it as parquet file in ADLS.",
+				"activities": [
+					{
+						"name": "Copy list of countries",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "$['name']['common']"
+										},
+										"sink": {
+											"name": "name_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['official']"
+										},
+										"sink": {
+											"name": "name_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['eng']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_eng_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['eng']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_eng_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['kck']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_kck_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['kck']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_kck_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['khi']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_khi_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['khi']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_khi_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['ndc']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_ndc_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['ndc']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_ndc_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['nde']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_nde_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['nde']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_nde_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['nya']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_nya_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['nya']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_nya_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['sna']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_sna_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['sna']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_sna_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['sot']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_sot_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['sot']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_sot_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['toi']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_toi_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['toi']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_toi_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['tsn']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_tsn_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['tsn']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_tsn_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['tso']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_tso_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['tso']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_tso_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['ven']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_ven_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['ven']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_ven_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['xho']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_xho_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['xho']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_xho_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['zib']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_zib_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['zib']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_zib_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['gil']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_gil_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['gil']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_gil_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['kor']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_kor_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['kor']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_kor_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['spa']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_spa_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['spa']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_spa_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['ara']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_ara_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['ara']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_ara_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['ita']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_ita_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['ita']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_ita_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['fra']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_fra_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['fra']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_fra_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['por']['official']"
+										},
+										"sink": {
+											"name": "name_nativeName_por_official",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['name']['nativeName']['por']['common']"
+										},
+										"sink": {
+											"name": "name_nativeName_por_common",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['cca2']"
+										},
+										"sink": {
+											"name": "cca2",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['capital'][0]"
+										},
+										"sink": {
+											"name": "items",
+											"type": "String"
+										}
+									}
+								],
+								"collectionReference": "",
+								"mapComplexValuesToString": true
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "REST_DS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Parquet_Countries_API_DS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-03-18T00:24:40Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/REST_DS')]",
+				"[concat(variables('factoryId'), '/datasets/Parquet_Countries_API_DS')]"
 			]
 		},
 		{
@@ -973,11 +1556,83 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-13T19:37:15Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Product_DS')]",
 				"[concat(variables('factoryId'), '/datasets/CSV_ADLS_Generic_DS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Copy_Product_Table_To_CSV')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copying Product data from SQL DB to ADLS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SQL_DB_Product_DS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "CSV_Product_DS",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-03-17T21:04:17Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SQL_DB_Product_DS')]",
+				"[concat(variables('factoryId'), '/datasets/CSV_Product_DS')]"
 			]
 		},
 		{
@@ -1017,7 +1672,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T17:02:32Z"
+				"lastPublishTime": "2026-03-17T21:04:16Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDB_LS')]"
@@ -1138,7 +1793,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T18:07:45Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Customer_DS')]",
@@ -1232,7 +1887,7 @@
 					}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T16:31:58Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Generic_DS')]",
@@ -1363,7 +2018,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-13T15:29:28Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/CSV_Customer_DS')]",
@@ -1414,7 +2069,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-11T15:56:29Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/MetaData_DS')]"
@@ -1594,7 +2249,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-13T15:32:18Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Product_DS')]",
@@ -1668,7 +2323,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-09T15:32:13Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Customer_DS')]",
@@ -1745,7 +2400,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T00:43:39Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Customer_DS')]",
@@ -1886,7 +2541,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T15:43:55Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Product_DS')]",
@@ -2005,7 +2660,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T01:06:02Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Product_DS')]",
@@ -2056,7 +2711,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-14T21:17:59Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/dataflow_for_SCD_Type2')]"
@@ -2104,7 +2759,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-14T21:18:00Z"
+				"lastPublishTime": "2026-03-17T21:04:18Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/DF_SCD2_Employee')]"
@@ -2151,7 +2806,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-15T22:36:18Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/T8_2_Q1_dataflow')]"
@@ -2199,7 +2854,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-15T20:18:58Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/T8_Q3_dataflow')]"
@@ -2247,7 +2902,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-15T20:40:49Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/T8_Q4_dataflow1')]"
@@ -2294,7 +2949,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-15T19:04:13Z"
+				"lastPublishTime": "2026-03-17T21:04:18Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/Task8_Q1_Dataflow')]"
@@ -2343,7 +2998,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-15T19:39:14Z"
+				"lastPublishTime": "2026-03-17T21:04:18Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/Join_Customer_CustAddress_Dataflow')]"
@@ -2489,7 +3144,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T16:37:41Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Generic_DS')]",
@@ -2580,7 +3235,7 @@
 					}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T22:35:19Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Generic_DS')]",
@@ -2734,7 +3389,7 @@
 					}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T22:35:19Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Generic_DS')]",
@@ -2822,7 +3477,7 @@
 					}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T22:35:19Z"
+				"lastPublishTime": "2026-03-17T21:04:17Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SQL_DB_Generic_DS')]",
@@ -3541,6 +4196,88 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Json_API_Generic')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_LS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"countryname": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().countryname",
+							"type": "Expression"
+						},
+						"folderPath": "countries",
+						"fileSystem": "landing"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"CustomerID": {
+							"type": "integer"
+						},
+						"NameStyle": {
+							"type": "boolean"
+						},
+						"Title": {
+							"type": "string"
+						},
+						"FirstName": {
+							"type": "string"
+						},
+						"MiddleName": {
+							"type": "string"
+						},
+						"LastName": {
+							"type": "string"
+						},
+						"Suffix": {
+							"type": "string"
+						},
+						"CompanyName": {
+							"type": "string"
+						},
+						"SalesPerson": {
+							"type": "string"
+						},
+						"EmailAddress": {
+							"type": "string"
+						},
+						"Phone": {
+							"type": "string"
+						},
+						"PasswordHash": {
+							"type": "string"
+						},
+						"PasswordSalt": {
+							"type": "string"
+						},
+						"rowguid": {
+							"type": "string"
+						},
+						"ModifiedDate": {
+							"type": "string"
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_LS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/MetaData_DS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -3669,6 +4406,125 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Parquet_API_Countries_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_LS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "countries",
+						"fileSystem": "landing"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_LS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Parquet_Countries_API_DS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ADLS_LS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "countries",
+						"fileSystem": "landing"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "CustomerID",
+						"type": "INT32"
+					},
+					{
+						"name": "NameStyle",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "Title",
+						"type": "UTF8"
+					},
+					{
+						"name": "FirstName",
+						"type": "UTF8"
+					},
+					{
+						"name": "MiddleName",
+						"type": "UTF8"
+					},
+					{
+						"name": "LastName",
+						"type": "UTF8"
+					},
+					{
+						"name": "Suffix",
+						"type": "UTF8"
+					},
+					{
+						"name": "CompanyName",
+						"type": "UTF8"
+					},
+					{
+						"name": "SalesPerson",
+						"type": "UTF8"
+					},
+					{
+						"name": "EmailAddress",
+						"type": "UTF8"
+					},
+					{
+						"name": "Phone",
+						"type": "UTF8"
+					},
+					{
+						"name": "PasswordHash",
+						"type": "UTF8"
+					},
+					{
+						"name": "PasswordSalt",
+						"type": "UTF8"
+					},
+					{
+						"name": "rowguid",
+						"type": "UTF8"
+					},
+					{
+						"name": "ModifiedDate",
+						"type": "INT96"
+					},
+					{
+						"name": "AddressID",
+						"type": "INT_16"
+					},
+					{
+						"name": "AddressType",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ADLS_LS')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Parquet_T8_Q2_DS')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -3710,6 +4566,34 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/REST_LS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Rest_Generic')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "RestService_LS2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"countryname": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {
+					"relativeUrl": {
+						"value": "@dataset().countryname",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/RestService_LS2')]"
 			]
 		},
 		{
@@ -4175,6 +5059,52 @@
 					"enableServerCertificateValidation": true,
 					"authenticationType": "Anonymous"
 				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RestService_LS2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('RestService_LS2_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure-IR-1')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "East US",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 10,
+							"cleanup": false,
+							"customProperties": []
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SelfHosted-IR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
 			},
 			"dependsOn": []
 		},

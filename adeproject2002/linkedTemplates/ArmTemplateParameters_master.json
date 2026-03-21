@@ -24,7 +24,10 @@
 			"value": "adeolao"
 		},
 		"REST_LS_properties_typeProperties_url": {
-			"value": "https://restcountries.com/v3.1/all?fields=name,capital,currencies"
+			"value": "https://restcountries.com/v3.1/all?fields=name,capital,cca2"
+		},
+		"RestService_LS2_properties_typeProperties_url": {
+			"value": "https://restcountries.com/v3.1/name"
 		},
 		"containerUri": {
 			"value": ""

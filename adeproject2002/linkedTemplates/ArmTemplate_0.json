@@ -33,7 +33,11 @@
 		},
 		"REST_LS_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://restcountries.com/v3.1/all?fields=name,capital,currencies"
+			"defaultValue": "https://restcountries.com/v3.1/all?fields=name,capital,cca2"
+		},
+		"RestService_LS2_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://restcountries.com/v3.1/name"
 		}
 	},
 	"variables": {
@@ -97,6 +101,52 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/RestService_LS2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('RestService_LS2_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Azure-IR-1')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "East US",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 10,
+							"cleanup": false,
+							"customProperties": []
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SelfHosted-IR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Create table Customer_Copy')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -133,7 +183,7 @@
 					"elapsedTimeMetric": {}
 				},
 				"annotations": [],
-				"lastPublishTime": "2026-03-10T17:02:32Z"
+				"lastPublishTime": "2026-03-17T21:04:16Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDB_LS')]"
@@ -686,144 +736,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDB_LS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/JSON_Cust_CustAddress_T8_Q2_DS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ADLS_LS",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "Customer_CustomerAddress.json",
-						"folderPath": "Task8",
-						"fileSystem": "landing"
-					}
-				},
-				"schema": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ADLS_LS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/JSON_Customer_DS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ADLS_LS",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "SalesLT.Customer.json",
-						"folderPath": "JSON",
-						"fileSystem": "landing"
-					}
-				},
-				"schema": {
-					"type": "object",
-					"properties": {
-						"CustomerID": {
-							"type": "integer"
-						},
-						"NameStyle": {
-							"type": "boolean"
-						},
-						"Title": {
-							"type": "string"
-						},
-						"FirstName": {
-							"type": "string"
-						},
-						"MiddleName": {
-							"type": "string"
-						},
-						"LastName": {
-							"type": "string"
-						},
-						"Suffix": {
-							"type": "string"
-						},
-						"CompanyName": {
-							"type": "string"
-						},
-						"SalesPerson": {
-							"type": "string"
-						},
-						"EmailAddress": {
-							"type": "string"
-						},
-						"Phone": {
-							"type": "string"
-						},
-						"PasswordHash": {
-							"type": "string"
-						},
-						"PasswordSalt": {
-							"type": "string"
-						},
-						"rowguid": {
-							"type": "string"
-						},
-						"ModifiedDate": {
-							"type": "string"
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ADLS_LS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/JSON_Product_Generic_DS')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ADLS_LS",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"Filepath": {
-						"type": "String"
-					},
-					"filename": {
-						"type": "String"
-					}
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().filename",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().Filepath",
-							"type": "Expression"
-						},
-						"fileSystem": "landing"
-					}
-				},
-				"schema": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ADLS_LS')]"
 			]
 		}
 	]

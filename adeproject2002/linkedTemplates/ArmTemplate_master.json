@@ -33,7 +33,11 @@
 		},
 		"REST_LS_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://restcountries.com/v3.1/all?fields=name,capital,currencies"
+			"defaultValue": "https://restcountries.com/v3.1/all?fields=name,capital,cca2"
+		},
+		"RestService_LS2_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://restcountries.com/v3.1/name"
 		},
 		"containerUri": {
 			"type": "string",
@@ -82,6 +86,9 @@
 					},
 					"REST_LS_properties_typeProperties_url": {
 						"value": "[parameters('REST_LS_properties_typeProperties_url')]"
+					},
+					"RestService_LS2_properties_typeProperties_url": {
+						"value": "[parameters('RestService_LS2_properties_typeProperties_url')]"
 					}
 				}
 			},
@@ -145,6 +152,26 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'adeproject2002_ArmTemplate_2')]"
+			]
+		},
+		{
+			"name": "adeproject2002_ArmTemplate_4",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'adeproject2002_ArmTemplate_3')]"
 			]
 		}
 	]
