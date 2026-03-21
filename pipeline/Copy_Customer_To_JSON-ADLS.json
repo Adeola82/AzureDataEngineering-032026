@@ -1,5 +1,5 @@
 {
-	"name": "Copy_Customer_To_JSON",
+	"name": "Copy_Customer_To_JSON-ADLS",
 	"properties": {
 		"activities": [
 			{
