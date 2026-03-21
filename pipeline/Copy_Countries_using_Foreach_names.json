@@ -1,21 +1,21 @@
 {
-	"name": "Foreach_Example_for Cust_CustAddr",
+	"name": "Copy_Countries_using_Foreach_names",
 	"properties": {
+		"description": "Create a pipeline to fetch the 5 countries (india,us,uk,china,russia) data from Rest API (https://restcountries.com/v3.1/name/{name}  here replace the {name} with Country name like https://restcountries.com/v3.1/name/us) and save it in separate file as JSON with File name equal to Country name.",
 		"activities": [
 			{
-				"name": "Copy Data for Cust and Cust Addr using ForEach",
+				"name": "ForEach1",
 				"type": "ForEach",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@createArray('Customer', 'Address', 'CustomerAddress')",
+						"value": "@createArray('india','us','uk','china','russia')",
 						"type": "Expression"
 					},
-					"isSequential": true,
 					"activities": [
 						{
-							"name": "Copy both Customer and their address details",
+							"name": "Copy data1",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -28,9 +28,13 @@
 							"userProperties": [],
 							"typeProperties": {
 								"source": {
-									"type": "AzureSqlSource",
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
+									"type": "RestSource",
+									"httpRequestTimeout": "00:01:40",
+									"requestInterval": "00.00:00:00.010",
+									"requestMethod": "GET",
+									"paginationRules": {
+										"supportRFC5988": "true"
+									}
 								},
 								"sink": {
 									"type": "JsonSink",
@@ -45,11 +49,10 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "SQL_DB_Generic_DS",
+									"referenceName": "Rest_Generic",
 									"type": "DatasetReference",
 									"parameters": {
-										"SchemaName": "SalesLT",
-										"FileName": {
+										"countryname": {
 											"value": "@item()",
 											"type": "Expression"
 										}
@@ -58,12 +61,11 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "JSON_Product_Generic_DS",
+									"referenceName": "Json_API_Generic",
 									"type": "DatasetReference",
 									"parameters": {
-										"Filepath": "JSON",
-										"filename": {
-											"value": "@concat(pipeline().parameters.SchemaName,'.',item())",
+										"countryname": {
+											"value": "@item()",
 											"type": "Expression"
 										}
 									}
@@ -74,13 +76,8 @@
 				}
 			}
 		],
-		"parameters": {
-			"SchemaName": {
-				"type": "String"
-			}
-		},
 		"annotations": [],
-		"lastPublishTime": "2026-03-17T21:04:17Z"
+		"lastPublishTime": "2026-03-18T00:44:58Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }

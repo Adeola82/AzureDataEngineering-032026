@@ -1,0 +1,478 @@
+{
+	"name": "Copy_List_of_Countries_REST_API",
+	"properties": {
+		"description": "Create a pipeline to fetch the All countries data from Rest API (https://restcountries.com/v3.1/all) and save it as parquet file in ADLS.",
+		"activities": [
+			{
+				"name": "Copy list of countries",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"supportRFC5988": "true"
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['name']['common']"
+								},
+								"sink": {
+									"name": "name_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['official']"
+								},
+								"sink": {
+									"name": "name_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['eng']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_eng_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['eng']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_eng_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['kck']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_kck_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['kck']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_kck_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['khi']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_khi_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['khi']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_khi_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['ndc']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_ndc_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['ndc']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_ndc_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['nde']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_nde_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['nde']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_nde_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['nya']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_nya_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['nya']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_nya_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['sna']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_sna_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['sna']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_sna_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['sot']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_sot_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['sot']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_sot_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['toi']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_toi_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['toi']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_toi_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['tsn']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_tsn_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['tsn']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_tsn_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['tso']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_tso_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['tso']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_tso_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['ven']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_ven_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['ven']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_ven_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['xho']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_xho_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['xho']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_xho_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['zib']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_zib_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['zib']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_zib_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['gil']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_gil_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['gil']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_gil_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['kor']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_kor_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['kor']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_kor_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['spa']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_spa_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['spa']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_spa_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['ara']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_ara_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['ara']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_ara_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['ita']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_ita_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['ita']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_ita_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['fra']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_fra_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['fra']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_fra_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['por']['official']"
+								},
+								"sink": {
+									"name": "name_nativeName_por_official",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['name']['nativeName']['por']['common']"
+								},
+								"sink": {
+									"name": "name_nativeName_por_common",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['cca2']"
+								},
+								"sink": {
+									"name": "cca2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['capital'][0]"
+								},
+								"sink": {
+									"name": "items",
+									"type": "String"
+								}
+							}
+						],
+						"collectionReference": "",
+						"mapComplexValuesToString": true
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "REST_DS",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Parquet_Countries_API_DS",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2026-03-18T00:24:40Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

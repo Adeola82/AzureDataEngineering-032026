@@ -1,9 +1,9 @@
 {
-	"name": "pipeline3-Product",
+	"name": "Copy_Product_Table_To_CSV",
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy Product data",
+				"name": "Copying Product data from SQL DB to ADLS",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -43,36 +43,18 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "SQL_DB_Generic_DS",
-						"type": "DatasetReference",
-						"parameters": {
-							"SchemaName": "SalesLT",
-							"FileName": "Product"
-						}
+						"referenceName": "SQL_DB_Product_DS",
+						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "CSV_ADLS_Generic_DS",
-						"type": "DatasetReference",
-						"parameters": {
-							"FilePath": {
-								"value": "@concat(\npipeline().parameters.filename,\n'/',\nformatDateTime(utcnow(),'yyyy'),\n'/',\nformatDateTime(utcnow(),'MM'),\n'/',\nformatDateTime(utcnow(),'dd')\n)\n",
-								"type": "Expression"
-							},
-							"Filesystem": "landing",
-							"filename": "@concat(pipeline().parameters.filename,'.csv')"
-						}
+						"referenceName": "CSV_Product_DS",
+						"type": "DatasetReference"
 					}
 				]
 			}
 		],
-		"parameters": {
-			"filename": {
-				"type": "string",
-				"defaultValue": "Product"
-			}
-		},
 		"annotations": [],
 		"lastPublishTime": "2026-03-17T21:04:17Z"
 	},

@@ -1,0 +1,24 @@
+{
+	"name": "Rest_Generic",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "RestService_LS2",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"countryname": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": {
+				"value": "@dataset().countryname",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

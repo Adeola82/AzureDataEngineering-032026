@@ -1,11 +1,11 @@
 {
-	"name": "REST_LS",
+	"name": "RestService_LS2",
 	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"annotations": [],
 		"type": "RestService",
 		"typeProperties": {
-			"url": "https://restcountries.com/v3.1/all?fields=name,capital,cca2",
+			"url": "https://restcountries.com/v3.1/name",
 			"enableServerCertificateValidation": true,
 			"authenticationType": "Anonymous"
 		}
